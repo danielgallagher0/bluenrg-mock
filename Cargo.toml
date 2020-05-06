@@ -1,0 +1,9 @@
+[package]
+name = "bluenrg-mock"
+version = "0.0.4"
+authors = ["Daniel Gallagher <pdanielgallagher@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
