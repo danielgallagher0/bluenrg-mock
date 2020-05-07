@@ -1,5 +1,3 @@
-//! Mock implementation of the bluetooth_hci and bluenrg traits for use in our dependencies' tests.
-
 #![allow(dead_code)]
 #![allow(missing_docs)]
 
@@ -41,7 +39,7 @@ impl Controller {
 
     pub fn expect_write_config_data(
         &mut self,
-        data: &bluenrg::hal::ConfigData,
+        data: &crate::hal::ConfigData,
     ) -> ReturnBuilder<nb::Result<(), NeverError>> {
         self.expected
             .push(ExpectedCall::WriteConfigData(config_data_as_bytes(data)));
@@ -56,8 +54,8 @@ impl Controller {
         &mut self,
     ) -> ReturnBuilder<
         nb::Result<
-            bluetooth_hci::host::uart::Packet<bluenrg::event::BlueNRGEvent>,
-            bluetooth_hci::host::uart::Error<NeverError, bluenrg::event::BlueNRGError>,
+            bluetooth_hci::host::uart::Packet<crate::event::BlueNRGEvent>,
+            bluetooth_hci::host::uart::Error<NeverError, crate::event::BlueNRGError>,
         >,
     > {
         self.expected.push(ExpectedCall::Read);
@@ -73,7 +71,7 @@ impl Controller {
     pub fn expect_le_set_random_address(
         &mut self,
         bd_addr: bluetooth_hci::BdAddr,
-    ) -> ReturnBuilder<nb::Result<(), bluetooth_hci::host::Error<NeverError, bluenrg::event::Status>>>
+    ) -> ReturnBuilder<nb::Result<(), bluetooth_hci::host::Error<NeverError, crate::event::Status>>>
     {
         self.expected
             .push(ExpectedCall::LeSetRandomAddress(bd_addr));
@@ -113,7 +111,7 @@ impl Controller {
 
     pub fn expect_gap_init(
         &mut self,
-        role: bluenrg::gap::Role,
+        role: crate::gap::Role,
         privacy_enabled: bool,
         dev_name_characteristic_len: u8,
     ) -> ReturnBuilder<nb::Result<(), NeverError>> {
@@ -140,7 +138,7 @@ impl Controller {
 
     pub fn expect_add_service(
         &mut self,
-        params: bluenrg::gatt::AddServiceParameters,
+        params: crate::gatt::AddServiceParameters,
     ) -> ReturnBuilder<nb::Result<(), NeverError>> {
         self.expected.push(ExpectedCall::GattAddService(params));
         ReturnBuilder {
@@ -152,7 +150,7 @@ impl Controller {
 
     pub fn expect_add_characteristic(
         &mut self,
-        params: bluenrg::gatt::AddCharacteristicParameters,
+        params: crate::gatt::AddCharacteristicParameters,
     ) -> ReturnBuilder<nb::Result<(), NeverError>> {
         self.expected
             .push(ExpectedCall::GattAddCharacteristic(params));
@@ -166,7 +164,7 @@ impl Controller {
     pub fn expect_set_discoverable(
         &mut self,
         params: OwnedDiscoverableParameters,
-    ) -> ReturnBuilder<nb::Result<(), bluenrg::gap::Error<NeverError>>> {
+    ) -> ReturnBuilder<nb::Result<(), crate::gap::Error<NeverError>>> {
         self.expected.push(ExpectedCall::GapSetDiscoverable(params));
         ReturnBuilder {
             controller: self,
@@ -178,7 +176,7 @@ impl Controller {
     pub fn expect_update_characteristic_value(
         &mut self,
         params: OwnedCharacteristicValueParameters,
-    ) -> ReturnBuilder<nb::Result<(), bluenrg::gatt::Error<NeverError>>> {
+    ) -> ReturnBuilder<nb::Result<(), crate::gatt::Error<NeverError>>> {
         self.expected
             .push(ExpectedCall::GattUpdateCharacteristicValue(params));
         ReturnBuilder {
@@ -210,16 +208,16 @@ enum ExpectedCall {
     LeSetRandomAddress(bluetooth_hci::BdAddr),
     LeSetScanParameters(bluetooth_hci::host::ScanParameters),
     LeSetScanEnable(bool, bool),
-    GapInit(bluenrg::gap::Role, bool, u8),
+    GapInit(crate::gap::Role, bool, u8),
     GapSetDiscoverable(OwnedDiscoverableParameters),
     GattInit,
-    GattAddService(bluenrg::gatt::AddServiceParameters),
-    GattAddCharacteristic(bluenrg::gatt::AddCharacteristicParameters),
+    GattAddService(crate::gatt::AddServiceParameters),
+    GattAddCharacteristic(crate::gatt::AddCharacteristicParameters),
     GattUpdateCharacteristicValue(OwnedCharacteristicValueParameters),
     Read,
 }
 
-fn config_data_as_bytes(data: &bluenrg::hal::ConfigData) -> Vec<u8> {
+fn config_data_as_bytes(data: &crate::hal::ConfigData) -> Vec<u8> {
     let mut bytes = [0; 31];
     let size = data.copy_into_slice(&mut bytes);
 
@@ -230,13 +228,13 @@ fn config_data_as_bytes(data: &bluenrg::hal::ConfigData) -> Vec<u8> {
 enum ReturnValue {
     Bool(bool),
     UnitResult(nb::Result<(), NeverError>),
-    UnitResultHost(nb::Result<(), bluetooth_hci::host::Error<NeverError, bluenrg::event::Status>>),
-    UnitResultGap(nb::Result<(), bluenrg::gap::Error<NeverError>>),
-    UnitResultGatt(nb::Result<(), bluenrg::gatt::Error<NeverError>>),
+    UnitResultHost(nb::Result<(), bluetooth_hci::host::Error<NeverError, crate::event::Status>>),
+    UnitResultGap(nb::Result<(), crate::gap::Error<NeverError>>),
+    UnitResultGatt(nb::Result<(), crate::gatt::Error<NeverError>>),
     PacketResult(
         nb::Result<
-            bluetooth_hci::host::uart::Packet<bluenrg::event::BlueNRGEvent>,
-            bluetooth_hci::host::uart::Error<NeverError, bluenrg::event::BlueNRGError>,
+            bluetooth_hci::host::uart::Packet<crate::event::BlueNRGEvent>,
+            bluetooth_hci::host::uart::Error<NeverError, crate::event::BlueNRGError>,
         >,
     ),
 }
@@ -272,16 +270,16 @@ impl<'a>
     ReturnBuilder<
         'a,
         nb::Result<
-            bluetooth_hci::host::uart::Packet<bluenrg::event::BlueNRGEvent>,
-            bluetooth_hci::host::uart::Error<NeverError, bluenrg::event::BlueNRGError>,
+            bluetooth_hci::host::uart::Packet<crate::event::BlueNRGEvent>,
+            bluetooth_hci::host::uart::Error<NeverError, crate::event::BlueNRGError>,
         >,
     >
 {
     pub fn to_return(
         &mut self,
         t: nb::Result<
-            bluetooth_hci::host::uart::Packet<bluenrg::event::BlueNRGEvent>,
-            bluetooth_hci::host::uart::Error<NeverError, bluenrg::event::BlueNRGError>,
+            bluetooth_hci::host::uart::Packet<crate::event::BlueNRGEvent>,
+            bluetooth_hci::host::uart::Error<NeverError, crate::event::BlueNRGError>,
         >,
     ) {
         self.return_value = ReturnValue::PacketResult(t);
@@ -327,15 +325,15 @@ impl bluetooth_hci::event::VendorReturnParameters for NeverError {
 impl
     bluetooth_hci::host::uart::Hci<
         NeverError,
-        bluenrg::event::BlueNRGEvent,
-        bluenrg::event::BlueNRGError,
+        crate::event::BlueNRGEvent,
+        crate::event::BlueNRGError,
     > for Controller
 {
     fn read(
         &mut self,
     ) -> nb::Result<
-        bluetooth_hci::host::uart::Packet<bluenrg::event::BlueNRGEvent>,
-        bluetooth_hci::host::uart::Error<NeverError, bluenrg::event::BlueNRGError>,
+        bluetooth_hci::host::uart::Packet<crate::event::BlueNRGEvent>,
+        bluetooth_hci::host::uart::Error<NeverError, crate::event::BlueNRGError>,
     > {
         assert!(!self.expected.is_empty(), "No expectations remaining");
         match self.expected.remove(0) {
@@ -352,7 +350,7 @@ impl
 }
 
 impl bluetooth_hci::host::Hci<NeverError> for Controller {
-    type VS = bluenrg::event::Status;
+    type VS = crate::event::Status;
 
     fn disconnect(
         &mut self,
@@ -632,7 +630,7 @@ impl bluetooth_hci::host::Hci<NeverError> for Controller {
     }
 }
 
-impl bluenrg::gap::Commands for Controller {
+impl crate::gap::Commands for Controller {
     type Error = NeverError;
 
     fn set_nondiscoverable(&mut self) -> nb::Result<(), Self::Error> {
@@ -641,15 +639,15 @@ impl bluenrg::gap::Commands for Controller {
 
     fn set_limited_discoverable<'a, 'b>(
         &mut self,
-        _params: &bluenrg::gap::DiscoverableParameters<'a, 'b>,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _params: &crate::gap::DiscoverableParameters<'a, 'b>,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("set_limited_discoverable<'a, 'b> mock not implemented");
     }
 
     fn set_discoverable<'a, 'b>(
         &mut self,
-        params: &bluenrg::gap::DiscoverableParameters<'a, 'b>,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        params: &crate::gap::DiscoverableParameters<'a, 'b>,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         assert!(!self.expected.is_empty(), "No expectations remaining");
         if let ExpectedCall::GapSetDiscoverable(expected_data) = self.expected.remove(0) {
             assert_eq!(expected_data, params.into());
@@ -666,22 +664,22 @@ impl bluenrg::gap::Commands for Controller {
 
     fn set_direct_connectable(
         &mut self,
-        _params: &bluenrg::gap::DirectConnectableParameters,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _params: &crate::gap::DirectConnectableParameters,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("set_direct_connectable mock not implemented");
     }
 
     fn set_io_capability(
         &mut self,
-        _capability: bluenrg::gap::IoCapability,
+        _capability: crate::gap::IoCapability,
     ) -> nb::Result<(), Self::Error> {
         panic!("set_io_capability mock not implemented");
     }
 
     fn set_authentication_requirement(
         &mut self,
-        _requirements: &bluenrg::gap::AuthenticationRequirements,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _requirements: &crate::gap::AuthenticationRequirements,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("set_authentication_requirement mock not implemented");
     }
 
@@ -697,21 +695,21 @@ impl bluenrg::gap::Commands for Controller {
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
         _pin: u32,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("pass_key_response mock not implemented");
     }
 
     fn authorization_response(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _authorization: bluenrg::gap::Authorization,
+        _authorization: crate::gap::Authorization,
     ) -> nb::Result<(), Self::Error> {
         panic!("authorization_response mock not implemented");
     }
 
     fn init(
         &mut self,
-        role: bluenrg::gap::Role,
+        role: crate::gap::Role,
         privacy_enabled: bool,
         dev_name_characteristic_len: u8,
     ) -> nb::Result<(), Self::Error> {
@@ -741,23 +739,23 @@ impl bluenrg::gap::Commands for Controller {
 
     fn set_nonconnectable(
         &mut self,
-        _advertising_type: bluenrg::gap::AdvertisingType,
-        _address_type: bluenrg::gap::AddressType,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _advertising_type: crate::gap::AdvertisingType,
+        _address_type: crate::gap::AddressType,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("set_nonconnectable mock not implemented");
     }
 
     fn set_undirected_connectable(
         &mut self,
-        _filter_policy: bluenrg::gap::AdvertisingFilterPolicy,
-        _address_type: bluenrg::gap::AddressType,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _filter_policy: crate::gap::AdvertisingFilterPolicy,
+        _address_type: crate::gap::AddressType,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("set_undirected_connectable mock not implemented");
     }
 
     fn peripheral_security_request(
         &mut self,
-        _params: &bluenrg::gap::SecurityRequestParameters,
+        _params: &crate::gap::SecurityRequestParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("peripheral_security_request mock not implemented");
     }
@@ -765,13 +763,13 @@ impl bluenrg::gap::Commands for Controller {
     fn update_advertising_data(
         &mut self,
         _data: &[u8],
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("update_advertising_data mock not implemented");
     }
 
     fn delete_ad_type(
         &mut self,
-        _ad_type: bluenrg::gap::AdvertisingDataType,
+        _ad_type: crate::gap::AdvertisingDataType,
     ) -> nb::Result<(), Self::Error> {
         panic!("delete_ad_type mock not implemented");
     }
@@ -780,7 +778,7 @@ impl bluenrg::gap::Commands for Controller {
         panic!("get_security_level mock not implemented");
     }
 
-    fn set_event_mask(&mut self, _flags: bluenrg::gap::EventFlags) -> nb::Result<(), Self::Error> {
+    fn set_event_mask(&mut self, _flags: crate::gap::EventFlags) -> nb::Result<(), Self::Error> {
         panic!("set_event_mask mock not implemented");
     }
 
@@ -791,8 +789,8 @@ impl bluenrg::gap::Commands for Controller {
     fn terminate(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _reason: bluetooth_hci::Status<bluenrg::event::Status>,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _reason: bluetooth_hci::Status<crate::event::Status>,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("terminate mock not implemented");
     }
 
@@ -809,70 +807,70 @@ impl bluenrg::gap::Commands for Controller {
 
     fn start_limited_discovery_procedure(
         &mut self,
-        _params: &bluenrg::gap::DiscoveryProcedureParameters,
+        _params: &crate::gap::DiscoveryProcedureParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("start_limited_discovery_procedure mock not implemented");
     }
 
     fn start_general_discovery_procedure(
         &mut self,
-        _params: &bluenrg::gap::DiscoveryProcedureParameters,
+        _params: &crate::gap::DiscoveryProcedureParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("start_general_discovery_procedure mock not implemented");
     }
 
     fn start_name_discovery_procedure(
         &mut self,
-        _params: &bluenrg::gap::NameDiscoveryProcedureParameters,
+        _params: &crate::gap::NameDiscoveryProcedureParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("start_name_discovery_procedure mock not implemented");
     }
 
     fn start_auto_connection_establishment<'a>(
         &mut self,
-        _params: &bluenrg::gap::AutoConnectionEstablishmentParameters<'a>,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _params: &crate::gap::AutoConnectionEstablishmentParameters<'a>,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("start_auto_connection_establishment<'a> mock not implemented");
     }
 
     fn start_general_connection_establishment(
         &mut self,
-        _params: &bluenrg::gap::GeneralConnectionEstablishmentParameters,
+        _params: &crate::gap::GeneralConnectionEstablishmentParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("start_general_connection_establishment mock not implemented");
     }
 
     fn start_selective_connection_establishment<'a>(
         &mut self,
-        _params: &bluenrg::gap::SelectiveConnectionEstablishmentParameters<'a>,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _params: &crate::gap::SelectiveConnectionEstablishmentParameters<'a>,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("start_selective_connection_establishment<'a> mock not implemented");
     }
 
     fn create_connection(
         &mut self,
-        _params: &bluenrg::gap::ConnectionParameters,
+        _params: &crate::gap::ConnectionParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("create_connection mock not implemented");
     }
 
     fn terminate_procedure(
         &mut self,
-        _procedure: bluenrg::gap::Procedure,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _procedure: crate::gap::Procedure,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("terminate_procedure mock not implemented");
     }
 
     fn start_connection_update(
         &mut self,
-        _params: &bluenrg::gap::ConnectionUpdateParameters,
+        _params: &crate::gap::ConnectionUpdateParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("start_connection_update mock not implemented");
     }
 
     fn send_pairing_request(
         &mut self,
-        _params: &bluenrg::gap::PairingRequest,
+        _params: &crate::gap::PairingRequest,
     ) -> nb::Result<(), Self::Error> {
         panic!("send_pairing_request mock not implemented");
     }
@@ -890,14 +888,14 @@ impl bluenrg::gap::Commands for Controller {
 
     fn set_broadcast_mode(
         &mut self,
-        _params: &bluenrg::gap::BroadcastModeParameters,
-    ) -> nb::Result<(), bluenrg::gap::Error<Self::Error>> {
+        _params: &crate::gap::BroadcastModeParameters,
+    ) -> nb::Result<(), crate::gap::Error<Self::Error>> {
         panic!("set_broadcast_mode mock not implemented");
     }
 
     fn start_observation_procedure(
         &mut self,
-        _params: &bluenrg::gap::ObservationProcedureParameters,
+        _params: &crate::gap::ObservationProcedureParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("start_observation_procedure mock not implemented");
     }
@@ -910,7 +908,7 @@ impl bluenrg::gap::Commands for Controller {
     }
 }
 
-impl bluenrg::gatt::Commands for Controller {
+impl crate::gatt::Commands for Controller {
     type Error = NeverError;
 
     fn init(&mut self) -> nb::Result<(), Self::Error> {
@@ -929,7 +927,7 @@ impl bluenrg::gatt::Commands for Controller {
 
     fn add_service(
         &mut self,
-        params: &bluenrg::gatt::AddServiceParameters,
+        params: &crate::gatt::AddServiceParameters,
     ) -> nb::Result<(), Self::Error> {
         assert!(!self.expected.is_empty(), "No expectations remaining");
         if let ExpectedCall::GattAddService(expected) = self.expected.remove(0) {
@@ -949,14 +947,14 @@ impl bluenrg::gatt::Commands for Controller {
 
     fn include_service(
         &mut self,
-        _params: &bluenrg::gatt::IncludeServiceParameters,
+        _params: &crate::gatt::IncludeServiceParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("include_service mock not implemented");
     }
 
     fn add_characteristic(
         &mut self,
-        params: &bluenrg::gatt::AddCharacteristicParameters,
+        params: &crate::gatt::AddCharacteristicParameters,
     ) -> nb::Result<(), Self::Error> {
         assert!(!self.expected.is_empty(), "No expectations remaining");
         if let ExpectedCall::GattAddCharacteristic(expected) = self.expected.remove(0) {
@@ -988,15 +986,15 @@ impl bluenrg::gatt::Commands for Controller {
 
     fn add_characteristic_descriptor<'a>(
         &mut self,
-        _params: &bluenrg::gatt::AddDescriptorParameters<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::AddDescriptorParameters<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("add_characteristic_descriptor<'a> mock not implemented");
     }
 
     fn update_characteristic_value<'a>(
         &mut self,
-        params: &bluenrg::gatt::UpdateCharacteristicValueParameters<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        params: &crate::gatt::UpdateCharacteristicValueParameters<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         assert!(!self.expected.is_empty(), "No expectations remaining");
         match self.expected.remove(0) {
             ExpectedCall::GattUpdateCharacteristicValue(expected_data) => {
@@ -1014,27 +1012,27 @@ impl bluenrg::gatt::Commands for Controller {
 
     fn delete_characteristic(
         &mut self,
-        _service: bluenrg::gatt::ServiceHandle,
-        _characteristic: bluenrg::gatt::CharacteristicHandle,
+        _service: crate::gatt::ServiceHandle,
+        _characteristic: crate::gatt::CharacteristicHandle,
     ) -> nb::Result<(), Self::Error> {
         panic!("delete_characteristic mock not implemented");
     }
 
     fn delete_service(
         &mut self,
-        _service: bluenrg::gatt::ServiceHandle,
+        _service: crate::gatt::ServiceHandle,
     ) -> nb::Result<(), Self::Error> {
         panic!("delete_service mock not implemented");
     }
 
     fn delete_included_service(
         &mut self,
-        _params: &bluenrg::gatt::DeleteIncludedServiceParameters,
+        _params: &crate::gatt::DeleteIncludedServiceParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("delete_included_service mock not implemented");
     }
 
-    fn set_event_mask(&mut self, _mask: bluenrg::gatt::Event) -> nb::Result<(), Self::Error> {
+    fn set_event_mask(&mut self, _mask: crate::gatt::Event) -> nb::Result<(), Self::Error> {
         panic!("set_event_mask mock not implemented");
     }
 
@@ -1048,36 +1046,36 @@ impl bluenrg::gatt::Commands for Controller {
     fn find_information_request(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _attribute_range: bluenrg::gatt::Range<bluenrg::gatt::CharacteristicHandle>,
+        _attribute_range: crate::gatt::Range<crate::gatt::CharacteristicHandle>,
     ) -> nb::Result<(), Self::Error> {
         panic!("find_information_request mock not implemented");
     }
 
     fn find_by_type_value_request(
         &mut self,
-        _params: &bluenrg::gatt::FindByTypeValueParameters,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::FindByTypeValueParameters,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("find_by_type_value_request mock not implemented");
     }
 
     fn read_by_type_request(
         &mut self,
-        _params: &bluenrg::gatt::ReadByTypeParameters,
+        _params: &crate::gatt::ReadByTypeParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_by_type_request mock not implemented");
     }
 
     fn read_by_group_type_request(
         &mut self,
-        _params: &bluenrg::gatt::ReadByTypeParameters,
+        _params: &crate::gatt::ReadByTypeParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_by_group_type_request mock not implemented");
     }
 
     fn prepare_write_request<'a>(
         &mut self,
-        _params: &bluenrg::gatt::WriteRequest<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::WriteRequest<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("prepare_write_request<'a> mock not implemented");
     }
 
@@ -1105,7 +1103,7 @@ impl bluenrg::gatt::Commands for Controller {
     fn discover_primary_services_by_uuid(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _uuid: bluenrg::gatt::Uuid,
+        _uuid: crate::gatt::Uuid,
     ) -> nb::Result<(), Self::Error> {
         panic!("discover_primary_services_by_uuid mock not implemented");
     }
@@ -1113,7 +1111,7 @@ impl bluenrg::gatt::Commands for Controller {
     fn find_included_services(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _service_handle_range: bluenrg::gatt::Range<bluenrg::gatt::ServiceHandle>,
+        _service_handle_range: crate::gatt::Range<crate::gatt::ServiceHandle>,
     ) -> nb::Result<(), Self::Error> {
         panic!("find_included_services mock not implemented");
     }
@@ -1121,7 +1119,7 @@ impl bluenrg::gatt::Commands for Controller {
     fn discover_all_characteristics_of_service(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _attribute_handle_range: bluenrg::gatt::Range<bluenrg::gatt::CharacteristicHandle>,
+        _attribute_handle_range: crate::gatt::Range<crate::gatt::CharacteristicHandle>,
     ) -> nb::Result<(), Self::Error> {
         panic!("discover_all_characteristics_of_service mock not implemented");
     }
@@ -1129,8 +1127,8 @@ impl bluenrg::gatt::Commands for Controller {
     fn discover_characteristics_by_uuid(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _attribute_handle_range: bluenrg::gatt::Range<bluenrg::gatt::CharacteristicHandle>,
-        _uuid: bluenrg::gatt::Uuid,
+        _attribute_handle_range: crate::gatt::Range<crate::gatt::CharacteristicHandle>,
+        _uuid: crate::gatt::Uuid,
     ) -> nb::Result<(), Self::Error> {
         panic!("discover_characteristics_by_uuid mock not implemented");
     }
@@ -1138,7 +1136,7 @@ impl bluenrg::gatt::Commands for Controller {
     fn discover_all_characteristic_descriptors(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _characteristic_handle_range: bluenrg::gatt::Range<bluenrg::gatt::CharacteristicHandle>,
+        _characteristic_handle_range: crate::gatt::Range<crate::gatt::CharacteristicHandle>,
     ) -> nb::Result<(), Self::Error> {
         panic!("discover_all_characteristic_descriptors mock not implemented");
     }
@@ -1146,7 +1144,7 @@ impl bluenrg::gatt::Commands for Controller {
     fn read_characteristic_value(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _characteristic_handle: bluenrg::gatt::CharacteristicHandle,
+        _characteristic_handle: crate::gatt::CharacteristicHandle,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_characteristic_value mock not implemented");
     }
@@ -1154,87 +1152,87 @@ impl bluenrg::gatt::Commands for Controller {
     fn read_characteristic_using_uuid(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _characteristic_handle_range: bluenrg::gatt::Range<bluenrg::gatt::CharacteristicHandle>,
-        _uuid: bluenrg::gatt::Uuid,
+        _characteristic_handle_range: crate::gatt::Range<crate::gatt::CharacteristicHandle>,
+        _uuid: crate::gatt::Uuid,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_characteristic_using_uuid mock not implemented");
     }
 
     fn read_long_characteristic_value(
         &mut self,
-        _params: &bluenrg::gatt::LongCharacteristicReadParameters,
+        _params: &crate::gatt::LongCharacteristicReadParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_long_characteristic_value mock not implemented");
     }
 
     fn read_multiple_characteristic_values<'a>(
         &mut self,
-        _params: &bluenrg::gatt::MultipleCharacteristicReadParameters<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::MultipleCharacteristicReadParameters<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("read_multiple_characteristic_values<'a> mock not implemented");
     }
 
     fn write_characteristic_value<'a>(
         &mut self,
-        _params: &bluenrg::gatt::CharacteristicValue<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::CharacteristicValue<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("write_characteristic_value<'a> mock not implemented");
     }
 
     fn write_long_characteristic_value<'a>(
         &mut self,
-        _params: &bluenrg::gatt::LongCharacteristicValue<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::LongCharacteristicValue<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("write_long_characteristic_value<'a> mock not implemented");
     }
 
     fn write_characteristic_value_reliably<'a>(
         &mut self,
-        _params: &bluenrg::gatt::LongCharacteristicValue<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::LongCharacteristicValue<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("write_characteristic_value_reliably<'a> mock not implemented");
     }
 
     fn write_long_characteristic_descriptor<'a>(
         &mut self,
-        _params: &bluenrg::gatt::LongCharacteristicValue<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::LongCharacteristicValue<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("write_long_characteristic_descriptor<'a> mock not implemented");
     }
 
     fn read_long_characteristic_descriptor(
         &mut self,
-        _params: &bluenrg::gatt::LongCharacteristicReadParameters,
+        _params: &crate::gatt::LongCharacteristicReadParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_long_characteristic_descriptor mock not implemented");
     }
 
     fn write_characteristic_descriptor<'a>(
         &mut self,
-        _params: &bluenrg::gatt::CharacteristicValue<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::CharacteristicValue<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("write_characteristic_descriptor<'a> mock not implemented");
     }
 
     fn read_characteristic_descriptor(
         &mut self,
         _conn_handle: bluetooth_hci::ConnectionHandle,
-        _characteristic_handle: bluenrg::gatt::CharacteristicHandle,
+        _characteristic_handle: crate::gatt::CharacteristicHandle,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_characteristic_descriptor mock not implemented");
     }
 
     fn write_without_response<'a>(
         &mut self,
-        _params: &bluenrg::gatt::CharacteristicValue<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::CharacteristicValue<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("write_without_response<'a> mock not implemented");
     }
 
     fn signed_write_without_response<'a>(
         &mut self,
-        _params: &bluenrg::gatt::CharacteristicValue<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::CharacteristicValue<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("signed_write_without_response<'a> mock not implemented");
     }
 
@@ -1247,8 +1245,8 @@ impl bluenrg::gatt::Commands for Controller {
 
     fn write_response<'a>(
         &mut self,
-        _params: &bluenrg::gatt::WriteResponseParameters<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::WriteResponseParameters<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("write_response<'a> mock not implemented");
     }
 
@@ -1261,28 +1259,28 @@ impl bluenrg::gatt::Commands for Controller {
 
     fn set_security_permission(
         &mut self,
-        _params: &bluenrg::gatt::SecurityPermissionParameters,
+        _params: &crate::gatt::SecurityPermissionParameters,
     ) -> nb::Result<(), Self::Error> {
         panic!("set_security_permission mock not implemented");
     }
 
     fn set_descriptor_value<'a>(
         &mut self,
-        _params: &bluenrg::gatt::DescriptorValueParameters<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::DescriptorValueParameters<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("set_descriptor_value<'a> mock not implemented");
     }
 
     fn read_handle_value(
         &mut self,
-        _handle: bluenrg::gatt::CharacteristicHandle,
+        _handle: crate::gatt::CharacteristicHandle,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_handle_value mock not implemented");
     }
 
     fn read_handle_value_offset(
         &mut self,
-        _handle: bluenrg::gatt::CharacteristicHandle,
+        _handle: crate::gatt::CharacteristicHandle,
         _offset: usize,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_handle_value_offset mock not implemented");
@@ -1290,13 +1288,13 @@ impl bluenrg::gatt::Commands for Controller {
 
     fn update_long_characteristic_value<'a>(
         &mut self,
-        _params: &bluenrg::gatt::UpdateLongCharacteristicValueParameters<'a>,
-    ) -> nb::Result<(), bluenrg::gatt::Error<Self::Error>> {
+        _params: &crate::gatt::UpdateLongCharacteristicValueParameters<'a>,
+    ) -> nb::Result<(), crate::gatt::Error<Self::Error>> {
         panic!("update_long_characteristic_value<'a> mock not implemented");
     }
 }
 
-impl bluenrg::hal::Commands for Controller {
+impl crate::hal::Commands for Controller {
     type Error = NeverError;
 
     fn get_firmware_revision(&mut self) -> nb::Result<(), Self::Error> {
@@ -1305,7 +1303,7 @@ impl bluenrg::hal::Commands for Controller {
 
     fn write_config_data(
         &mut self,
-        config: &bluenrg::hal::ConfigData,
+        config: &crate::hal::ConfigData,
     ) -> nb::Result<(), Self::Error> {
         if let ExpectedCall::WriteConfigData(expected_data) = self.expected.remove(0) {
             assert_eq!(expected_data, config_data_as_bytes(config));
@@ -1322,14 +1320,14 @@ impl bluenrg::hal::Commands for Controller {
 
     fn read_config_data(
         &mut self,
-        _param: bluenrg::hal::ConfigParameter,
+        _param: crate::hal::ConfigParameter,
     ) -> nb::Result<(), Self::Error> {
         panic!("read_config_data mock not implemented");
     }
 
     fn set_tx_power_level(
         &mut self,
-        _level: bluenrg::hal::PowerLevel,
+        _level: crate::hal::PowerLevel,
     ) -> nb::Result<(), Self::Error> {
         panic!("set_tx_power_level mock not implemented");
     }
@@ -1342,7 +1340,7 @@ impl bluenrg::hal::Commands for Controller {
         panic!("get_tx_test_packet_count mock not implemented");
     }
 
-    fn start_tone(&mut self, _channel: u8) -> nb::Result<(), bluenrg::hal::Error<Self::Error>> {
+    fn start_tone(&mut self, _channel: u8) -> nb::Result<(), crate::hal::Error<Self::Error>> {
         panic!("start_tone mock not implemented");
     }
 
@@ -1359,39 +1357,39 @@ impl bluenrg::hal::Commands for Controller {
     }
 }
 
-impl bluenrg::l2cap::Commands for Controller {
+impl crate::l2cap::Commands for Controller {
     type Error = NeverError;
 
     fn connection_parameter_update_request(
         &mut self,
-        _params: &bluenrg::l2cap::ConnectionParameterUpdateRequest,
+        _params: &crate::l2cap::ConnectionParameterUpdateRequest,
     ) -> nb::Result<(), Self::Error> {
         panic!("connection_parameter_update_request mock not implemented");
     }
 
     fn connection_parameter_update_response(
         &mut self,
-        _params: &bluenrg::l2cap::ConnectionParameterUpdateResponse,
+        _params: &crate::l2cap::ConnectionParameterUpdateResponse,
     ) -> nb::Result<(), Self::Error> {
         panic!("connection_parameter_update_response");
     }
 }
 
-/// This is a version of [bluenrg::gap::DiscoverableParameters] that owns all of its values, so it can
+/// This is a version of [crate::gap::DiscoverableParameters] that owns all of its values, so it can
 /// be stored in the mock.
 #[derive(Debug, Clone, PartialEq)]
 pub struct OwnedDiscoverableParameters {
-    pub advertising_type: bluenrg::gap::AdvertisingType,
+    pub advertising_type: crate::gap::AdvertisingType,
     pub advertising_interval: Option<(Duration, Duration)>,
-    pub address_type: bluenrg::gap::OwnAddressType,
-    pub filter_policy: bluenrg::gap::AdvertisingFilterPolicy,
+    pub address_type: crate::gap::OwnAddressType,
+    pub filter_policy: crate::gap::AdvertisingFilterPolicy,
     pub local_name: Option<OwnedLocalName>,
     pub advertising_data: Vec<u8>,
     pub conn_interval: (Option<Duration>, Option<Duration>),
 }
 
-impl<'a, 'b> From<&bluenrg::gap::DiscoverableParameters<'a, 'b>> for OwnedDiscoverableParameters {
-    fn from(it: &bluenrg::gap::DiscoverableParameters<'a, 'b>) -> Self {
+impl<'a, 'b> From<&crate::gap::DiscoverableParameters<'a, 'b>> for OwnedDiscoverableParameters {
+    fn from(it: &crate::gap::DiscoverableParameters<'a, 'b>) -> Self {
         OwnedDiscoverableParameters {
             advertising_type: it.advertising_type,
             advertising_interval: it.advertising_interval,
@@ -1413,27 +1411,27 @@ pub enum OwnedLocalName {
     Complete(Vec<u8>),
 }
 
-impl From<&bluenrg::gap::LocalName<'_>> for OwnedLocalName {
-    fn from(it: &bluenrg::gap::LocalName<'_>) -> Self {
+impl From<&crate::gap::LocalName<'_>> for OwnedLocalName {
+    fn from(it: &crate::gap::LocalName<'_>) -> Self {
         match it {
-            bluenrg::gap::LocalName::Shortened(s) => OwnedLocalName::Shortened(s.to_vec()),
-            bluenrg::gap::LocalName::Complete(s) => OwnedLocalName::Complete(s.to_vec()),
+            crate::gap::LocalName::Shortened(s) => OwnedLocalName::Shortened(s.to_vec()),
+            crate::gap::LocalName::Complete(s) => OwnedLocalName::Complete(s.to_vec()),
         }
     }
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct OwnedCharacteristicValueParameters {
-    pub service_handle: bluenrg::gatt::ServiceHandle,
-    pub characteristic_handle: bluenrg::gatt::CharacteristicHandle,
+    pub service_handle: crate::gatt::ServiceHandle,
+    pub characteristic_handle: crate::gatt::CharacteristicHandle,
     pub offset: usize,
     pub value: Vec<u8>,
 }
 
-impl From<&bluenrg::gatt::UpdateCharacteristicValueParameters<'_>>
+impl From<&crate::gatt::UpdateCharacteristicValueParameters<'_>>
     for OwnedCharacteristicValueParameters
 {
-    fn from(it: &bluenrg::gatt::UpdateCharacteristicValueParameters<'_>) -> Self {
+    fn from(it: &crate::gatt::UpdateCharacteristicValueParameters<'_>) -> Self {
         OwnedCharacteristicValueParameters {
             service_handle: it.service_handle,
             characteristic_handle: it.characteristic_handle,

@@ -7,3 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bluenrg = "0.0.4"
+bluetooth-hci = "0.0.4"
+nb = "*"
+
+[patch.crates-io]
+# bluenrg = { git = "https://github.com/danielgallagher0/bluenrg", branch = "master" }
+bluenrg = { path = "../bluenrg" }
+bluetooth-hci = { git = "https://github.com/danielgallagher0/bluetooth-hci", branch = "master" }
