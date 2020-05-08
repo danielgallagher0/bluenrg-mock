@@ -3,15 +3,16 @@ name = "bluenrg-mock"
 version = "0.0.4"
 authors = ["Daniel Gallagher <pdanielgallagher@gmail.com>"]
 edition = "2018"
+categories = []
+description = "Mock implementation of BlueNRG for tests"
+keywords = []
+license = "MIT/Apache-2.0"
+repository = "https://github.com/danielgallagher0/bluenrg-mock"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bluenrg = "0.0.4"
-bluetooth-hci = "0.0.4"
-nb = "*"
-
-[patch.crates-io]
-# bluenrg = { git = "https://github.com/danielgallagher0/bluenrg", branch = "master" }
-bluenrg = { path = "../bluenrg" }
-bluetooth-hci = { git = "https://github.com/danielgallagher0/bluetooth-hci", branch = "master" }
+bluenrg = "0.1.0"
+bluetooth-hci = "0.1.0"
+nb = "0.1.2"
